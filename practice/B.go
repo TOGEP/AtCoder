@@ -36,13 +36,20 @@ func quickSort(str []string, lenght int) (ret []string) {
 		}
 	}
 
-	right = quickSort(right, len(right))
-	left = quickSort(left, len(left))
+	rightchan := make(chan []string)
+	leftchan := make(chan []string)
+	go sortChan(right, rightchan)
+	go sortChan(left, leftchan)
 
-	ret = append(left, pivot)
-	ret = append(ret, right...)
+	rl := <-rightchan
+	ll := <-leftchan
 
-	return ret
+	return append(append(ll, pivot), rl...)
+}
+
+func sortChan(list []string, ch chan []string) {
+	ret := quickSort(list, len(list))
+	ch <- ret
 }
 
 func main() {
